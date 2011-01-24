@@ -10,7 +10,7 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 				<property name="url" value="jdbc:mysql://localhost/tak" />
 				<property name="driver" value="com.mysql.jdbc.Driver" />
 				<property name="username" value="root" />
-				<property name="password" value="toor" />
+				<property name="password" value="green" />
 			</dataSource>
 		</environment>
 	</environments>
