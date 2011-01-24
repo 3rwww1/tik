@@ -1,0 +1,47 @@
+<!--  
+/* 
+ * This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; version 2 of the License.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ */
+-->
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration>
+	<classPathEntry
+		location="/home/erwan/.m2/repository/mysql/mysql-connector-java/5.1.14/mysql-connector-java-5.1.14.jar" />
+	<context defaultModelType="flat" id="takContext" targetRuntime="MyBatis3">
+		<commentGenerator>
+			<property name="suppressDate" value="true" />
+		</commentGenerator>
+		<jdbcConnection userId="root" password="toor"
+			driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://localhost/tak"></jdbcConnection>
+		<javaModelGenerator targetPackage="be.okno.tik.tak.commons.model"
+			targetProject="TAKCommons"></javaModelGenerator>
+		<sqlMapGenerator targetPackage="be.okno.tik.tak.dao.mapper"
+			targetProject="TAKDao"></sqlMapGenerator>
+		<javaClientGenerator targetPackage="be.okno.tik.tak.dao.mapper"
+			targetProject="TAKDao" type="XMLMAPPER" />
+		<table schema="tak" tableName="clock" domainObjectName="Clock"
+			enableSelectByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableCountByExample="false"/>
+		<table schema="tak" tableName="mddef" domainObjectName="MetaDataDefinition"
+			enableSelectByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableCountByExample="false"/>
+		<table schema="tak" tableName="mdval" domainObjectName="MetaDataValue"
+			enableSelectByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableCountByExample="false"/>
+		<table schema="tak" tableName="tik" domainObjectName="Tik"
+			enableSelectByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableCountByExample="false"/>
+		<table schema="tak" tableName="clock2mddef" domainObjectName="RelClockMetaDataDefinition"
+			enableSelectByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableCountByExample="false"/>
+	</context>
+</generatorConfiguration>
