@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2011-01-24T17:36:31</date>
+  <millis>1295886991956</millis>
+  <sequence>0</sequence>
+  <logger>be.okno.tik.tak.server.BootStrap</logger>
+  <level>INFO</level>
+  <class>be.okno.tik.tak.server.net.Acceptor</class>
+  <method>&lt;init&gt;</method>
+  <thread>10</thread>
+  <message>Server started listening on port: 30223</message>
+</record>
+<record>
+  <date>2011-01-24T17:36:31</date>
+  <millis>1295886991999</millis>
+  <sequence>1</sequence>
+  <logger>be.okno.tik.tak.server.BootStrap</logger>
+  <level>INFO</level>
+  <class>be.okno.tik.tak.server.net.Acceptor</class>
+  <method>run</method>
+  <thread>10</thread>
+  <message>Accepting clients</message>
+</record>
+</log>
