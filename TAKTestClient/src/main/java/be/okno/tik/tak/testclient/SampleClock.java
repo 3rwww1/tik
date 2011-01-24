@@ -18,7 +18,7 @@ import be.okno.tik.tak.commons.model.Clock;
 import be.okno.tik.tak.commons.model.MetaDataDefinition;
 import be.okno.tik.tak.dao.DaoSession;
 
-public class DuplicateClocks {
+public class SampleClock {
 
 	public void duplicateClocksLauncher() {
 
@@ -40,6 +40,6 @@ public class DuplicateClocks {
 	}
 	
 	public static void main(String... args) {
-		new DuplicateClocks().duplicateClocksLauncher(); 
+		new SampleClock().duplicateClocksLauncher(); 
 	}
 }
