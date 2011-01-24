@@ -15,6 +15,7 @@ package be.okno.tik.tak.server.net;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.logging.Level;
 
@@ -35,6 +36,11 @@ public class ClientHandler implements Runnable {
 		try {
 			is = clientSocket.getInputStream();
 			InputStreamReader isReader = new InputStreamReader(is);
+			BootStrap.getLogger().info("CLIENT LOGGED IN");
+			
+			PrintWriter pw = new PrintWriter(clientSocket.getOutputStream());
+			pw.println("CONNECTION ACCEPTED");
+			
 			new WindClockProtocol(isReader).run();
 		} catch (IOException e) {
 			BootStrap.getLogger().log(Level.SEVERE, "ERROR: Client I/O", e);
