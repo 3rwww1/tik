@@ -38,24 +38,27 @@ public class WindClockProtocol {
 	private Clock clock;
 	private JsonStreamParser parser;
 	private WindTimeProtocol wtp;
-	
+
 	private WindClockLogger wcLogger;
 
 	public WindClockProtocol(InputStreamReader isReader) {
 		parser = new JsonStreamParser(isReader);
 		mdDefsMap = new TreeMap<Integer, MetaDataDefinition>();
 		wcLogger = new WindClockLogger();
+		wtp = new WindTimeProtocol();
 	}
 
 	private boolean onClock() {
 		boolean result;
 		List<MetaDataDefinition> mdDefs = clock.getMetaDataDefinitions();
 
-		for (MetaDataDefinition mdDef : mdDefs) {
-			mdDefsMap.put(mdDef.getIdMddef(), mdDef);
+		if (mdDefs != null) {
+			for (MetaDataDefinition mdDef : mdDefs) {
+				mdDefsMap.put(mdDef.getIdMddef(), mdDef);
+			}
 		}
 		wcLogger.setMetaDataDefintionsMap(mdDefsMap);
-		
+
 		wcLogger.logClock(clock, ClockRequestStatus.LOGON_REQUEST, true);
 
 		// invoke blocking DAO call to retrieve clock data
@@ -72,6 +75,8 @@ public class WindClockProtocol {
 			wcLogger.logClock(clock, ClockRequestStatus.LOGON_PERSIST, false);
 			// login agent on XMPP server
 			wcLogger.logClock(clock, ClockRequestStatus.LOGON_XMPPCON, false);
+			result = wtp.onClock(clock);
+
 			// Everything OK
 			result = true;
 		} else {
@@ -94,15 +99,15 @@ public class WindClockProtocol {
 		if (nbMdVals != nbMdDefs) {
 			// the number of meta data values is inconsistent
 			result = false;
-		} else if (mdVals != null){
+		} else if (mdVals != null) {
 			// the number of meta data values is consistent
 
 			for (MetaDataValue mdVal : mdVals) {
-			
+
 				if (mdVal.getIdMddef() == null
 						|| mdDefsMap.get(mdVal.getIdMddef()) == null) {
 					// a meta data id is not correct
-				
+
 					result = false;
 					break;
 				}
@@ -125,8 +130,10 @@ public class WindClockProtocol {
 			// the clock id is not consistent
 			result = false;
 		}
+		wtp.onTik(tik);
+		wcLogger.logTik(result ? ClockRequestStatus.TIK_SUCCESS
+				: ClockRequestStatus.TIK_FAILURE, tik, true);
 
-		wcLogger.logTik(result ? ClockRequestStatus.TIK_SUCCESS : ClockRequestStatus.TIK_FAILURE, tik, true);
 		return result;
 	}
 
@@ -156,7 +163,7 @@ public class WindClockProtocol {
 		} catch (JsonSyntaxException jse) {
 			BootStrap.getLogger().log(Level.SEVERE, "ERROR: JSON syntax", jse);
 		} catch (RuntimeException rte) {
-			BootStrap.getLogger().log(Level.SEVERE, "ERROR : Runtime", rte);
+			BootStrap.getLogger().log(Level.SEVERE, "ERROR: Runtime", rte);
 		}
 	}
 }
