@@ -28,33 +28,42 @@ public class TestClock implements Runnable {
 	private Clock clock;
 	private int maxSleepMillis;
 	private int minSleepMillis;
+	private boolean verbose;
 
-	public TestClock(Clock clock, int maxSleepMillis, int minSleepMillis) {
+	private Random rng;
+
+	public TestClock(Clock clock, int maxSleepMillis, int minSleepMillis,
+			boolean verbose, Random rng) {
+
+		this.rng = rng;
 		this.clock = clock;
 		this.maxSleepMillis = maxSleepMillis;
 		this.minSleepMillis = minSleepMillis;
+		this.verbose = verbose;
 	}
 
 	public void run() {
 		Gson gson = new Gson();
 		try {
-			Socket socket = new Socket("193.93.114.234", 30223);
+			Socket socket = new Socket("localhost", 30223);
 
 			OutputStreamWriter osWriter = new OutputStreamWriter(
 					socket.getOutputStream());
 
 			String msg = gson.toJson(clock);
 
+			if (verbose) {
+				System.out.println("JSON MSG:\n" + msg);
+			}
+
 			osWriter.write(msg);
 			osWriter.flush();
-
-			Random rng = new Random(System.currentTimeMillis());
 
 			Tik tik = new Tik();
 			tik.setIdClock(clock.getIdClock());
 
 			int diffRate = maxSleepMillis - minSleepMillis;
-			
+
 			while (true) {
 				int rate = rng.nextInt(diffRate) + minSleepMillis;
 				try {
@@ -63,6 +72,9 @@ public class TestClock implements Runnable {
 					e.printStackTrace();
 				}
 				msg = gson.toJson(tik);
+				if (verbose) {
+					System.out.println("JSON MSG:\n" + msg);
+				}
 				osWriter.write(msg);
 				osWriter.flush();
 			}

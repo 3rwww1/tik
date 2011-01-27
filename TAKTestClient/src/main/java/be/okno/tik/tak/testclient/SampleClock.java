@@ -13,6 +13,7 @@ package be.okno.tik.tak.testclient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import be.okno.tik.tak.commons.model.Clock;
 import be.okno.tik.tak.commons.model.MetaDataDefinition;
@@ -22,8 +23,8 @@ public class SampleClock {
 
 	public void duplicateClocksLauncher() {
 
-		int minSleepMillis = 1900;
-		int maxSleepMillis = 2000;
+		int minSleepMillis = 200;
+		int maxSleepMillis = 3000;
 		Clock clock = DaoSession.getInstance().getClockById(1);
 		List<MetaDataDefinition> mdDefs = new ArrayList<MetaDataDefinition>();
 		MetaDataDefinition mdDef = new MetaDataDefinition();
@@ -33,10 +34,9 @@ public class SampleClock {
 		mdDefs.add(mdDef);
 
 		clock.setMetaDataDefinitions(mdDefs);
-		new Thread(new TestClock(clock, maxSleepMillis, minSleepMillis)).run();
-		System.out.println("here we go");
-		new Thread(new TestClock(clock, maxSleepMillis, minSleepMillis)).run();
-		System.out.println("here we go again");
+		
+		Random rng = new Random(System.currentTimeMillis());
+		new Thread(new TestClock(clock, maxSleepMillis, minSleepMillis, true, rng)).run();
 	}
 	
 	public static void main(String... args) {
