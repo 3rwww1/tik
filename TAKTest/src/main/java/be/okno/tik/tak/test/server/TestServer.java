@@ -48,16 +48,22 @@ public class TestServer {
 		doNodes();
 
 		if (con.isConnected()) {
-			LeafNode node;
-			try {
+			LeafNode node = null;
+	  	try {
 				node = (LeafNode) manager.getNode("clock1");
-				publishPayload(node, new Integer(123456).intValue());
-				publishPayload(node, new Integer(99999).intValue());
-				publishPayload(node, new Double(Math.random() * 10000).intValue());
 			} catch (XMPPException e) {
 				e.printStackTrace();
 			}
-		}
+		  while(true){
+				try {
+					Thread.sleep(2000);
+					//publishPayload(node, new Integer(99999).intValue());
+					publishPayload(node, new Double(Math.random() * 10000).intValue());					
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+		  }
+	  }
 	}
 
 	public static void login() {

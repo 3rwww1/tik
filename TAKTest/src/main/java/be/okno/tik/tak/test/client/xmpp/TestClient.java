@@ -19,23 +19,17 @@ import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.packet.DiscoverItems;
-import org.jivesoftware.smackx.pubsub.AccessModel;
-import org.jivesoftware.smackx.pubsub.CollectionNode;
-import org.jivesoftware.smackx.pubsub.ConfigureForm;
-import org.jivesoftware.smackx.pubsub.FormType;
 import org.jivesoftware.smackx.pubsub.ItemPublishEvent;
 import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.jivesoftware.smackx.pubsub.PayloadItem;
 import org.jivesoftware.smackx.pubsub.PubSubManager;
-import org.jivesoftware.smackx.pubsub.PublishModel;
-import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.pubsub.listener.ItemEventListener;
 
 public class TestClient {
   public static String host = "walls.okno.be";
-  //String user = "admin@walls.okno.be";
-  //String password = "t1k_t6k";
-  public static String user = "geraldo@walls.okno.be";
+	//public static String user = "admin@walls.okno.be";
+  //public static String password = "t1k_t6k";
+  public static String user = "geraldo@"+host;
   public static String password = "test";
   public static ConnectionConfiguration config;
   public static XMPPConnection connection;
@@ -47,12 +41,22 @@ public class TestClient {
 		  getClocks();
 		  //subscribe to clock
 		  subscribe("clock1");
+
+		  while(true){
+		  	try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		  }
 	  }
 	   
 	  public static void connect(){ 
 	    config = new ConnectionConfiguration(host, 5222);
 	    //config.setSASLAuthenticationEnabled(true); //throws an error, set to true?
 	    config.setSelfSignedCertificateEnabled(true);
+
 	    connection = new XMPPConnection(config);
 	    try 
 	    {
@@ -97,14 +101,14 @@ public class TestClient {
 	    try 
 	    {
 	      LeafNode clock = (LeafNode) manager.getNode(clockId);
-	      ItemEventListener myEventHandler = new ItemEventListener<PayloadItem>() 
+	      ItemEventListener<PayloadItem> myEventHandler = new ItemEventListener<PayloadItem>() 
 	      {
-	        // responder function
-	        public void handlePublishedItems(ItemPublishEvent<PayloadItem> subNode) 
+	        public void handlePublishedItems(ItemPublishEvent subNode) 
 	        {
 	        	System.out.println("new tik:"+subNode.getItems().toString());
 	        }
 	      };
+	      
 	      clock.addItemEventListener(myEventHandler);
 	      clock.subscribe(connection.getUser());
 	      System.out.println("subscribed to "+clockId);
