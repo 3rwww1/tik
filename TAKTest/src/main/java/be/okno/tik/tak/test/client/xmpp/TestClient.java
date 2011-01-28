@@ -40,7 +40,7 @@ public class TestClient {
 		  //test pubsub
 		  getClocks();
 		  //subscribe to clock
-		  subscribe("clock1");
+		  subscribe("clock2");
 
 		  while(true){
 		  	try {

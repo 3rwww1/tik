@@ -50,15 +50,18 @@ public class TestServer {
 		if (con.isConnected()) {
 			LeafNode node = null;
 	  	try {
-				node = (LeafNode) manager.getNode("clock1");
+				node = (LeafNode) manager.getNode("clock2");
+				setNode(node);
 			} catch (XMPPException e) {
 				e.printStackTrace();
 			}
+			int tik = 1;
 		  while(true){
 				try {
 					Thread.sleep(2000);
 					//publishPayload(node, new Integer(99999).intValue());
-					publishPayload(node, new Double(Math.random() * 10000).intValue());					
+					//publishPayload(node, new Double(Math.random() * 10000).intValue());			
+					publishPayload(node, tik++);	
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -158,8 +161,12 @@ public class TestServer {
 				"<clock xmlns='pubsub:clock'><id>" + node.getId() + "</id><tiks>" + tiks
 						+ "</tiks></clock>");
 
-		PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(node.getId(), payload);
-
+		PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>("clock" + tiks, payload);
+		node.publish(item);
+		System.out.println("TIK item " + tiks + " published to node " + node.getId());
+	}
+	
+	public static void setNode(LeafNode node){
 		ItemEventListener myEventHandler = new ItemEventListener() {
 			public void handlePublishedItems(ItemPublishEvent items) {
 				if (items != null) {
@@ -168,9 +175,5 @@ public class TestServer {
 			}
 		};
 		node.addItemEventListener(myEventHandler);
-
-		// publish items
-		node.publish(item);
-		System.out.println("TIK item " + tiks + " published to node " + node.getId());
 	}
 }
