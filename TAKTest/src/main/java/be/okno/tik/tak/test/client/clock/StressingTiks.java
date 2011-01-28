@@ -50,9 +50,9 @@ public class StressingTiks {
 
 			mdDefs.add(mdDef);
 
-			int minRateMillis = rng.nextInt(4000 / rng.nextInt(50));
+			int minRateMillis = rng.nextInt(10000 / 1 + rng.nextInt(50));
 			int maxRateMillis = minRateMillis
-					+ rng.nextInt((8000 / rng.nextInt(20)) - minRateMillis);
+					+ rng.nextInt((20000 / 1 + rng.nextInt(20)) - minRateMillis);
 
 			clock.setMetaDataDefinitions(mdDefs);
 			executor.execute(new TestClock(clock, maxRateMillis, minRateMillis,
