@@ -40,7 +40,7 @@ public class TestClient {
 		  //test pubsub
 		  getClocks();
 		  //subscribe to clock
-		  subscribe("clock2");
+		  //subscribe("clock2");
 
 		  while(true){
 		  	try {
@@ -84,6 +84,8 @@ public class TestClient {
 	      while (it.hasNext()) {
 	        DiscoverItems.Item item = it.next();
 	        System.out.println("Clock found:"+item.getNode());
+	        
+	        subscribe(item.getNode());
 
 	        //LeafNode node = (LeafNode)manager.getNode(item.getNode());
 	        //publishPayload(node, new Double(Math.random()*10000).intValue());

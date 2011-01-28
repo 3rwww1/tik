@@ -58,7 +58,7 @@ public class TestServer {
 			int tik = 1;
 		  while(true){
 				try {
-					Thread.sleep(2000);
+					Thread.sleep(50);
 					//publishPayload(node, new Integer(99999).intValue());
 					//publishPayload(node, new Double(Math.random() * 10000).intValue());			
 					publishPayload(node, tik++);	
