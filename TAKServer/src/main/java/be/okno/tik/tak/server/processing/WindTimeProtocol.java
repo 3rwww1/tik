@@ -14,54 +14,68 @@ package be.okno.tik.tak.server.processing;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 
 import org.jivesoftware.smack.AccountManager;
-import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.MessageListener;
-import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smackx.packet.DiscoverItems;
+import org.jivesoftware.smackx.pubsub.AccessModel;
+import org.jivesoftware.smackx.pubsub.ConfigureForm;
+import org.jivesoftware.smackx.pubsub.FormType;
+import org.jivesoftware.smackx.pubsub.LeafNode;
+import org.jivesoftware.smackx.pubsub.PayloadItem;
+import org.jivesoftware.smackx.pubsub.PubSubManager;
+import org.jivesoftware.smackx.pubsub.PublishModel;
+import org.jivesoftware.smackx.pubsub.SimplePayload;
 
 import be.okno.tik.tak.commons.model.Clock;
 import be.okno.tik.tak.commons.model.Tik;
 import be.okno.tik.tak.server.BootStrap;
 
 public class WindTimeProtocol {
+
 	private XMPPConnection connection;
 	private Clock clock;
 	private String loginPasswd;
-	private int tikNb = 0;
-	private Chat chat;
+	private PubSubManager mgr;
+	private LeafNode clockNode;
 
-	public void logXMPPException(XMPPException e, Level level, String type) {
+	private static final String hostString = "@localhost";
+
+	private void logXMPPException(XMPPException e, Level level, String type) {
 
 		boolean kwnErr = false;
 
-		if (e.getStreamError() != null) {
-			BootStrap.getLogger().log(
-					level,
-					"ERROR: " + type + " on XMPP server: stream error code: "
-							+ e.getStreamError().toString(), e);
-			kwnErr = true;
+		if (level != Level.SEVERE) {
+			BootStrap.getLogger().log(level, type + " on XMPP server");
+		} else {
+			if (e.getStreamError() != null) {
+				BootStrap.getLogger().log(
+						level,
+						type + " on XMPP server: stream error code: "
+								+ e.getStreamError().toString(), e);
+				kwnErr = true;
+			}
+			if (e.getXMPPError() != null) {
+				BootStrap.getLogger().log(
+						level,
+						type + " on XMPP server: XMPP error code: "
+								+ e.getXMPPError().getCode(), e);
+				kwnErr = true;
+			}
+			if (!kwnErr) {
+				BootStrap.getLogger().log(level,
+						type + " on XMPP server: unknown", e);
+			}
 		}
-		if (e.getXMPPError() != null) {
-			BootStrap.getLogger().log(
-					level,
-					"ERROR: " + type + " on XMPP server: XMPP error code: "
-							+ e.getXMPPError().getCode(), e);
-			kwnErr = true;
-		}
-		if (!kwnErr) {
-			BootStrap.getLogger().log(level,
-					"ERROR: " + type + " on XMPP server: unknown", e);
-		}
+
 	}
 
-	public boolean tryConnect() {
+	private boolean tryConnect() {
 
 		boolean result = true;
 		try {
@@ -73,35 +87,22 @@ public class WindTimeProtocol {
 		return result;
 	}
 
-	public boolean tryNormalLogin() {
+	private boolean tryNormalLogin() {
 		boolean result = true;
 
 		try {
-			SASLAuthentication.supportSASLMechanism("PLAIN", 0);
-			connection.login("airone" + "@localhost", "airone",
-					clock.getName());
+			connection.login(loginPasswd + hostString, loginPasswd, loginPasswd
+					+ clock.getIdClock());
 		} catch (XMPPException e) {
-			logXMPPException(e, Level.WARNING, "normal logon");
+			logXMPPException(e, Level.WARNING,
+					"normal logon failed for clock [" + loginPasswd
+							+ "], trying to create a new user on the server");
 			result = false;
 		}
 		return result;
 	}
 
-	public boolean tryAnonymousLogin() {
-		boolean result = false;
-
-		try {
-			connection.getSASLAuthentication();
-			connection.loginAnonymously();
-			result = true;
-		} catch (XMPPException e) {
-			logXMPPException(e, Level.SEVERE, "anonymous logon");
-		}
-
-		return result;
-	}
-
-	public boolean tryCreateAccount() {
+	private boolean tryCreateAccount() {
 
 		boolean result = false;
 
@@ -119,20 +120,63 @@ public class WindTimeProtocol {
 					if (key.equals("email")) {
 						value = loginPasswd + "@okno.be";
 					} else if (key.equals("username")) {
-						value = "hello";
+						value = loginPasswd;
 					} else if (key.equals("password")) {
-						value = "secret";
+						value = loginPasswd;
 					} else {
 						value = loginPasswd;
 					}
 					newAttributes.put(key, value);
-					System.out.println(key);
 				}
-				accMan.createAccount("hello", "secret", newAttributes);
+				accMan.createAccount(loginPasswd, loginPasswd, newAttributes);
 				result = true;
 			} catch (XMPPException e) {
 				logXMPPException(e, Level.SEVERE, "clock account creation");
 			}
+		}
+		return result;
+	}
+
+	private boolean createClockNodeIfNotExists() {
+		boolean result = true;
+		boolean nodeExists = false;
+
+		try {
+			DiscoverItems items = mgr.discoverNodes(null);
+			Iterator<DiscoverItems.Item> it = items.getItems();
+
+			while (it.hasNext()) {
+				DiscoverItems.Item item = it.next();
+				System.out.println(item.getNode());
+				if (item.getNode().equals(loginPasswd)) {
+					nodeExists = true;
+					break;
+				}
+			}
+			if (!nodeExists) {
+				result = createClockNode();
+			}
+		} catch (XMPPException e1) {
+			logXMPPException(e1, Level.SEVERE, "discovering node");
+			result = false;
+		}
+		return result;
+	}
+
+	private boolean createClockNode() {
+		boolean result = true;
+
+		ConfigureForm form = new ConfigureForm(FormType.submit);
+		form.setAccessModel(AccessModel.open);
+		form.setDeliverPayloads(true);
+		form.setNotifyRetract(false);
+		form.setPersistentItems(false);
+		form.setPublishModel(PublishModel.open);
+		try {
+			clockNode = (LeafNode) mgr.createNode(loginPasswd, form);
+		} catch (XMPPException e) {
+			logXMPPException(e, Level.SEVERE, "creating pubsub node");
+			result = false;
 		}
 		return result;
 	}
@@ -164,33 +208,59 @@ public class WindTimeProtocol {
 				}
 			}
 		}
-		
-		
 
 		if (result && connection != null) {
 
-			
-			chat = connection.getChatManager().createChat("isjtar@localhost", new MessageListener() {
-				
-			    public void processMessage(Chat chat, Message message) {
-			        System.out.println("Received message: " + message);
-			    }
-			});
-			
 			BootStrap.getLogger().info(
 					"XMPP connection success" + "\n\t" + "jid=["
-							+ connection.getServiceName() + "]");
+							+ connection.getUser() + "]");
 
+			mgr = new PubSubManager(connection, "pubsub.localhost");
+
+			result = createClockNodeIfNotExists();
 		}
 		return result;
 	}
 
 	public boolean onTik(Tik tik) {
 		try {
-			chat.sendMessage("TIK " + ++tikNb + " FROM : " + clock.getName());
+			clockNode.send(new PayloadItem<SimplePayload>(loginPasswd
+					+ System.currentTimeMillis(), new SimplePayload("tik",
+					"pubsub:clock:tik", "" + "")));
+
 		} catch (XMPPException e) {
 			e.printStackTrace();
 		}
 		return true;
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		connection.disconnect();
+		super.finalize();
+	}
+
+	public static void main(String[] av) {
+
+		class ClockWindTimeCreator {
+
+			private Clock clock;
+			private WindTimeProtocol wtp;
+
+			public ClockWindTimeCreator(Integer id, String name) {
+
+				this.clock = new Clock();
+				clock.setIdClock(id);
+				clock.setName(name);
+				this.wtp = new WindTimeProtocol();
+			}
+
+			public void test() {
+				wtp.onClock(clock);
+			}
+		}
+		new ClockWindTimeCreator(42, "cool").test();
+		new ClockWindTimeCreator(54, "prima").test();
+		new ClockWindTimeCreator(66, "genau").test();
 	}
 }
