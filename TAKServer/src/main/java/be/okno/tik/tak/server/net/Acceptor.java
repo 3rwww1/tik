@@ -19,28 +19,28 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
-import be.okno.tik.tak.server.BootStrap;
+import be.okno.tik.tak.server.Launcher;
 
 public class Acceptor implements Runnable {
 	private Executor threadPool = Executors.newCachedThreadPool();
 	private ServerSocket serverSocket = null;
 	private volatile boolean running = true;
-	private static final int SERVER_PORT = 30223;
+	private static final int CONF_TAK_PORT = 30223;
 
 	public Acceptor() {
 
 		try {
-			serverSocket = new ServerSocket(SERVER_PORT);
+			serverSocket = new ServerSocket(CONF_TAK_PORT);
 		} catch (IOException e) {
-			BootStrap
+			Launcher
 					.getLogger()
 					.log(Level.SEVERE,
 							"Error starting listening on server socket, port: " + 30223,
 							e);
-			BootStrap.exitOnError();
+			Launcher.exitOnError();
 		}
-		BootStrap.getLogger().info(
-				"Server started listening on port: " + SERVER_PORT);
+		Launcher.getLogger().info(
+				"Server started listening on port: " + CONF_TAK_PORT);
 	}
 
 	public void setRunning(boolean running) {
@@ -50,20 +50,20 @@ public class Acceptor implements Runnable {
 	public void run() {
 		while (running) {
 			try {
-				BootStrap.getLogger().info("Accepting clients");
+				Launcher.getLogger().info("Accepting clients");
 				Socket clientSocket = serverSocket.accept();
 				threadPool.execute(new ClientHandler(clientSocket));
 			} catch (IOException e) {
-				BootStrap.getLogger().log(Level.SEVERE, "Accept failed", e);
-				BootStrap.exitOnError();
+				Launcher.getLogger().log(Level.SEVERE, "Accept failed", e);
+				Launcher.exitOnError();
 			}
 		}
 		try {
 			serverSocket.close();
 		} catch (IOException e) {
-			BootStrap.getLogger().log(Level.SEVERE,
+			Launcher.getLogger().log(Level.SEVERE,
 					"Error closing server socket", e);
-			BootStrap.exitOnError();
+			Launcher.exitOnError();
 		}
 	}
 }

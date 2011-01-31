@@ -18,7 +18,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.logging.Level;
 
-import be.okno.tik.tak.server.BootStrap;
+import be.okno.tik.tak.server.Launcher;
 import be.okno.tik.tak.server.processing.WindClockProtocol;
 
 public class ClientHandler implements Runnable {
@@ -35,18 +35,18 @@ public class ClientHandler implements Runnable {
 		try {
 			is = clientSocket.getInputStream();
 			InputStreamReader isReader = new InputStreamReader(is);
-			BootStrap.getLogger().info("CLIENT LOGGED IN");
+			Launcher.getLogger().info("Client logged in");
 			clientSocket.getOutputStream().write("OK\r\n".getBytes());
 			
 			new WindClockProtocol(isReader).run();
 		} catch (IOException e) {
-			BootStrap.getLogger().log(Level.SEVERE, "ERROR: Client I/O", e);
+			Launcher.getLogger().log(Level.SEVERE, "ERROR: Client I/O", e);
 			e.printStackTrace();
 		} finally {
 			try {
 				clientSocket.close();
 			} catch (IOException e) {
-				BootStrap.getLogger().log(Level.SEVERE,
+				Launcher.getLogger().log(Level.SEVERE,
 						"ERROR: Client close connection", e);
 			}
 		}

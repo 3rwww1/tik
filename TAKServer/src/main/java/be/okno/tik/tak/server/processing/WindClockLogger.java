@@ -22,7 +22,7 @@ import be.okno.tik.tak.commons.model.MetaDataDefinition;
 import be.okno.tik.tak.commons.model.MetaDataValue;
 import be.okno.tik.tak.commons.model.Tik;
 import be.okno.tik.tak.commons.util.LocaleManager;
-import be.okno.tik.tak.server.BootStrap;
+import be.okno.tik.tak.server.Launcher;
 
 public class WindClockLogger {
 	
@@ -99,7 +99,7 @@ public class WindClockLogger {
 		if (logMdDefs) {
 			logMetaDataDefinitions(clock.getMetaDataDefinitions());
 		}
-		BootStrap.getLogger().info(sb.toString());
+		Launcher.getLogger().info(sb.toString());
 		sb.delete(0, sb.length());
 	}
 
@@ -112,7 +112,7 @@ public class WindClockLogger {
 		sb.append("]");
 		if (logMdVals)
 			logMetaDataValues(tik.getMetaDataValues());
-		BootStrap.getLogger().info(sb.toString());
+		Launcher.getLogger().info(sb.toString());
 		sb.delete(0, sb.length());
 	}
 }

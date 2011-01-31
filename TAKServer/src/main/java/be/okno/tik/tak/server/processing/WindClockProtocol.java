@@ -23,7 +23,7 @@ import be.okno.tik.tak.commons.model.MetaDataDefinition;
 import be.okno.tik.tak.commons.model.MetaDataValue;
 import be.okno.tik.tak.commons.model.Tik;
 import be.okno.tik.tak.dao.DaoSession;
-import be.okno.tik.tak.server.BootStrap;
+import be.okno.tik.tak.server.Launcher;
 import be.okno.tik.tak.server.processing.WindClockLogger.ClockRequestStatus;
 
 import com.google.gson.Gson;
@@ -32,6 +32,9 @@ import com.google.gson.JsonStreamParser;
 import com.google.gson.JsonSyntaxException;
 
 public class WindClockProtocol {
+	
+	private static final String ERR_JSON_STR = "ERROR: JSON syntax";
+	private static final String ERR_RUNTIME_STR = "ERROR: Runtime";
 
 	private Map<Integer, MetaDataDefinition> mdDefsMap;
 	private int nbMdDefs;
@@ -76,9 +79,6 @@ public class WindClockProtocol {
 			// login agent on XMPP server
 			wcLogger.logClock(clock, ClockRequestStatus.LOGON_XMPPCON, false);
 			result = wtp.onClock(clock);
-
-			// Everything OK
-			result = true;
 		} else {
 			// clock was not found by the DAO or the IDs were inconsistent
 			result = false;
@@ -130,7 +130,7 @@ public class WindClockProtocol {
 			// the clock id is not consistent
 			result = false;
 		}
-		wtp.onTik(tik);
+		result = wtp.onTik(tik);
 		wcLogger.logTik(result ? ClockRequestStatus.TIK_SUCCESS
 				: ClockRequestStatus.TIK_FAILURE, tik, true);
 
@@ -156,14 +156,14 @@ public class WindClockProtocol {
 							;
 					}
 				} else {
-					BootStrap.getLogger().log(Level.SEVERE,
+					Launcher.getLogger().log(Level.SEVERE,
 							"ERROR: Registering clock");
 				}
 			}
 		} catch (JsonSyntaxException jse) {
-			BootStrap.getLogger().log(Level.SEVERE, "ERROR: JSON syntax", jse);
+			Launcher.getLogger().log(Level.SEVERE, ERR_JSON_STR, jse);
 		} catch (RuntimeException rte) {
-			BootStrap.getLogger().log(Level.SEVERE, "ERROR: Runtime", rte);
+			Launcher.getLogger().log(Level.SEVERE, ERR_RUNTIME_STR, rte);
 		}
 	}
 }
