@@ -29,7 +29,7 @@ public class DaoSession {
 	static DaoSession instance = new DaoSession();
 
 	private SqlSessionFactory sqlSessionFactory;
-	private static final String resource = "be/okno/tik/tak/dao/DaoSessionConfig.xml";
+	private static final String resource = "DaoSessionConfig.xml";
 	private SqlSession sqlSession;
 	private ClockMapper mapper;
 
@@ -61,9 +61,8 @@ public class DaoSession {
 	}
 
 	public synchronized boolean updateClock(Clock clock) {
-		ClockMapper mapper = sqlSession.getMapper(ClockMapper.class);
-		int result = mapper.updateByPrimaryKey(clock);
-		System.out.println("RESULT FROM update : " + result);
+//		ClockMapper mapper = sqlSession.getMapper(ClockMapper.class);
+//		int result = mapper.updateByPrimaryKey(clock);
 		return true;
 	}
 
