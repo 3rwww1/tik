@@ -29,7 +29,7 @@ public class DaoSession {
 	static DaoSession instance = new DaoSession();
 
 	private SqlSessionFactory sqlSessionFactory;
-	private static final String resource = "DaoSessionConfig.xml";
+	private static final String CONF_DAOFILE = "DaoSessionConfig.xml";
 	private SqlSession sqlSession;
 	private ClockMapper mapper;
 
@@ -37,7 +37,7 @@ public class DaoSession {
 
 		Reader reader;
 		try {
-			reader = Resources.getResourceAsReader(resource);
+			reader = Resources.getResourceAsReader(CONF_DAOFILE);
 			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 		} catch (IOException e) {
 			System.err.println("Can't read Dao configuration file");
