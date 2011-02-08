@@ -24,6 +24,10 @@ import be.okno.tik.tak.server.processing.WindClockProtocol;
 public class ClientHandler implements Runnable {
 
 	Socket clientSocket;
+	private static final String LOG_CLIENT = "Incoming TAK client connection.";
+	private static final String ERR_IO_PROCESS = "I/O error while processing TAK client connection.";
+	private static final String ERR_IO_CLOSE = "ERROR: Closing client connection: ";
+	private static final byte[] CONN_ACK = { 'O', 'K', '\r', '\n' };
 
 	public ClientHandler(Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -32,24 +36,23 @@ public class ClientHandler implements Runnable {
 	public void run() {
 
 		InputStream is = null;
+		
 		try {
 			is = clientSocket.getInputStream();
 			InputStreamReader isReader = new InputStreamReader(is);
-			Launcher.getLogger().info("Client logged in");
-			clientSocket.getOutputStream().write("OK\r\n".getBytes());
-			
+			Launcher.getLogger().info(LOG_CLIENT);
+			clientSocket.getOutputStream().write(CONN_ACK);
+
 			new WindClockProtocol(isReader).run();
 		} catch (IOException e) {
-			Launcher.getLogger().log(Level.SEVERE, "ERROR: Client I/O", e);
+			Launcher.getLogger().log(Level.SEVERE, ERR_IO_PROCESS, e);
 			e.printStackTrace();
 		} finally {
 			try {
 				clientSocket.close();
 			} catch (IOException e) {
-				Launcher.getLogger().log(Level.SEVERE,
-						"ERROR: Client close connection", e);
+				Launcher.getLogger().log(Level.SEVERE, ERR_IO_CLOSE, e);
 			}
 		}
-
 	}
 }

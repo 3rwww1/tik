@@ -32,9 +32,11 @@ import com.google.gson.JsonStreamParser;
 import com.google.gson.JsonSyntaxException;
 
 public class WindClockProtocol {
-	
-	private static final String ERR_JSON_STR = "ERROR: JSON syntax";
-	private static final String ERR_RUNTIME_STR = "ERROR: Runtime";
+
+	private static final String ERR_JSON = "JSON syntax error while processing client input.";
+	private static final String ERR_RUNTIME = "Runtime error while processing client input.";
+	private static final String ERR_REGISTER = "An error occured receiving registering the current TAK client.";
+	private static final String ERR_TIK = "An error occured receving a tik on current TAK client.";
 
 	private Map<Integer, MetaDataDefinition> mdDefsMap;
 	private int nbMdDefs;
@@ -154,16 +156,18 @@ public class WindClockProtocol {
 						tik = (Tik) gson.fromJson(element, Tik.class);
 						if (onTik(tik))
 							;
+						else {
+							Launcher.getLogger().log(Level.SEVERE, ERR_TIK);
+						}
 					}
 				} else {
-					Launcher.getLogger().log(Level.SEVERE,
-							"ERROR: Registering clock");
+					Launcher.getLogger().log(Level.SEVERE, ERR_REGISTER);
 				}
 			}
 		} catch (JsonSyntaxException jse) {
-			Launcher.getLogger().log(Level.SEVERE, ERR_JSON_STR, jse);
+			Launcher.getLogger().log(Level.SEVERE, ERR_JSON, jse);
 		} catch (RuntimeException rte) {
-			Launcher.getLogger().log(Level.SEVERE, ERR_RUNTIME_STR, rte);
+			Launcher.getLogger().log(Level.SEVERE, ERR_RUNTIME, rte);
 		}
 	}
 }
