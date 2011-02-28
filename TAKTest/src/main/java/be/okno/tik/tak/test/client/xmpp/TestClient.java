@@ -27,7 +27,7 @@ import org.jivesoftware.smackx.pubsub.listener.ItemEventListener;
 
 public class TestClient {
   public static String host = "walls.okno.be";
-	//public static String user = "admin@walls.okno.be";
+  //public static String user = "admin@walls.okno.be";
   //public static String password = "t1k_t6k";
   public static String user = "geraldo@"+host;
   public static String password = "test";

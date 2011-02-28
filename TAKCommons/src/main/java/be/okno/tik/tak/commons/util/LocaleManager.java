@@ -16,22 +16,31 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
 
+/**
+ * 
+ * Set the default localization to English, and the default timezone to UTC. 
+ * 
+ * @author erwan
+ *
+ */
 public class LocaleManager {
 	
-	private final static String pattern = "yyyyMMDD-HHmmss-SSS";
-	private final static Locale locale = Locale.ENGLISH;
-	private final static String strTimeZone = "UTC";
-	private final static TimeZone timeZone = TimeZone.getTimeZone(strTimeZone);
-	static {
-		TimeZone.setDefault(timeZone);
-		Locale.setDefault(locale);
-	}
+	// Constant objects and values.
+	private final static String C_DATEPATTERN = "yyyyMMDD-HHmmss-SSS";
+	private final static Locale C_LOCALE = Locale.ENGLISH;
+	private final static String C_TZSTR = "UTC";
+	private final static TimeZone C_TZ = TimeZone.getTimeZone(C_TZSTR);
 	
+	static {
+		TimeZone.setDefault(C_TZ);
+		Locale.setDefault(C_LOCALE);
+	}
+
 	private LocaleManager()  {
-		
+		throw new AssertionError();
 	}
 	
 	public static final SimpleDateFormat getDateFormatter() {
-		return new SimpleDateFormat(pattern, locale);
+		return new SimpleDateFormat(C_DATEPATTERN, C_LOCALE);
 	}
 }

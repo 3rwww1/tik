@@ -22,29 +22,40 @@ import java.util.logging.Level;
 import be.okno.tik.tak.server.Launcher;
 
 public class Acceptor implements Runnable {
-	private Executor threadPool = Executors.newCachedThreadPool();
-	private ServerSocket serverSocket = null;
-	private volatile boolean running = true;
-	private static final int takPort = 30223;
 
-	private static final String ERR_LISTEN = "Setting up TAK server listen socket on port: "
-			+ takPort + ".";
-	private static final String ERR_ACCEPT = "Accept failed.";
-	private static final String ERR_IO = "I/O error while closing server socket.";
+	// Static configuration values.
+	private static final int C_TAKPORT = 30223;
 	
-	private static final String INFO_LISTEN = "Server started listening on port: "
-			+ takPort + ".";
-	private static final String INFO_ACCEPT = "Server now accepting clients.";
+	// Error messages.
+	private static final String E_LISTEN = "Error setting up TAK server listen socket on port: "
+			+ C_TAKPORT + ".";
+	private static final String E_ACCEPT = "Accept failed.";
+	private static final String E_CLOSE = "I/O error while closing server socket.";
 
+	// Info messages.
+	private static final String I_LISTEN = "Server started listening on port: "
+			+ C_TAKPORT + ".";
+	private static final String I_ACCEPT = "Server now accepting clients on port:"
+			+ C_TAKPORT + ".";
+
+	// Client thread pool.
+	private Executor threadPool = Executors.newCachedThreadPool();
+	
+	// Server socket.
+	private ServerSocket serverSocket = null;
+	
+	// This variable is set to true if the server should be running, false otherwise.
+	private volatile boolean running = true;
+	
 	public Acceptor() {
 
 		try {
-			serverSocket = new ServerSocket(takPort);
+			serverSocket = new ServerSocket(C_TAKPORT);
 		} catch (IOException e) {
-			Launcher.getLogger().log(Level.SEVERE, ERR_LISTEN, e);
+			Launcher.getLogger().log(Level.SEVERE, E_LISTEN, e);
 			Launcher.exitOnError();
 		}
-		Launcher.getLogger().info(INFO_LISTEN);
+		Launcher.getLogger().info(I_LISTEN);
 	}
 
 	public void setRunning(boolean running) {
@@ -54,19 +65,18 @@ public class Acceptor implements Runnable {
 	public void run() {
 		while (running) {
 			try {
-				Launcher.getLogger().info(INFO_ACCEPT);
+				Launcher.getLogger().info(I_ACCEPT);
 				Socket clientSocket = serverSocket.accept();
 				threadPool.execute(new ClientHandler(clientSocket));
 			} catch (IOException e) {
-				Launcher.getLogger().log(Level.SEVERE, ERR_ACCEPT, e);
+				Launcher.getLogger().log(Level.SEVERE, E_ACCEPT, e);
 				Launcher.exitOnError();
 			}
 		}
 		try {
 			serverSocket.close();
 		} catch (IOException e) {
-			Launcher.getLogger().log(Level.SEVERE,
-					ERR_IO, e);
+			Launcher.getLogger().log(Level.SEVERE, E_CLOSE, e);
 			Launcher.exitOnError();
 		}
 	}

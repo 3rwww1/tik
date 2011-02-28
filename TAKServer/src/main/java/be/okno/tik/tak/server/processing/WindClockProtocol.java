@@ -33,10 +33,11 @@ import com.google.gson.JsonSyntaxException;
 
 public class WindClockProtocol {
 
-	private static final String ERR_JSON = "JSON syntax error while processing client input.";
-	private static final String ERR_RUNTIME = "Runtime error while processing client input.";
-	private static final String ERR_REGISTER = "An error occured receiving registering the current TAK client.";
-	private static final String ERR_TIK = "An error occured receving a tik on current TAK client.";
+	// Error messages.
+	private static final String E_JSON = "JSON syntax error while processing client input.";
+	private static final String E_RUNTIME = "Runtime error while processing client input.";
+	private static final String E_REGISTER = "An error occured registering the current TAK client.";
+	private static final String E_TIK = "An error occured receiving a tik from the current TAK client.";
 
 	private Map<Integer, MetaDataDefinition> mdDefsMap;
 	private int nbMdDefs;
@@ -157,17 +158,17 @@ public class WindClockProtocol {
 						if (onTik(tik))
 							;
 						else {
-							Launcher.getLogger().log(Level.SEVERE, ERR_TIK);
+							Launcher.getLogger().log(Level.SEVERE, E_TIK);
 						}
 					}
 				} else {
-					Launcher.getLogger().log(Level.SEVERE, ERR_REGISTER);
+					Launcher.getLogger().log(Level.SEVERE, E_REGISTER);
 				}
 			}
 		} catch (JsonSyntaxException jse) {
-			Launcher.getLogger().log(Level.SEVERE, ERR_JSON, jse);
+			Launcher.getLogger().log(Level.SEVERE, E_JSON, jse);
 		} catch (RuntimeException rte) {
-			Launcher.getLogger().log(Level.SEVERE, ERR_RUNTIME, rte);
+			Launcher.getLogger().log(Level.SEVERE, E_RUNTIME, rte);
 		}
 	}
 }

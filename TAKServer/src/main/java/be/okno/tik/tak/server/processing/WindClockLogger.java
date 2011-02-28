@@ -31,7 +31,26 @@ public class WindClockLogger {
 	private Map<Integer, MetaDataDefinition> mdDefsMap;
 	
 	protected enum ClockRequestStatus {
-		LOGON_REQUEST, LOGON_PERSIST, LOGON_XMPPCON, LOGON_SUCCESS, LOGON_FAILURE, TIK_REQUEST, TIK_SUCCESS, TIK_PERSIST, TIK_XMPPCON, TIK_FAILURE;
+		/** Log on request */
+		LOGON_REQUEST,
+		/** Log on persistence */
+		LOGON_PERSIST, 
+		/** Log on XMMP connection */
+		LOGON_XMPPCON, 
+		/** Log on success */
+		LOGON_SUCCESS, 
+		/** Log on failure */
+		LOGON_FAILURE, 
+		/** TIK request */ 
+		TIK_REQUEST, 
+		/** TIK success */ 
+		TIK_SUCCESS, 
+		/** TIK persistence */
+		TIK_PERSIST,
+		/** TIK XMPP send */
+		TIK_XMPPSEND, 
+		/** TIK failure */
+		TIK_FAILURE;
 	}
 	
 	protected WindClockLogger() {

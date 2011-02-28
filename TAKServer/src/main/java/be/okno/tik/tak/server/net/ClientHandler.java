@@ -23,11 +23,18 @@ import be.okno.tik.tak.server.processing.WindClockProtocol;
 
 public class ClientHandler implements Runnable {
 
+	// Client socket.
 	Socket clientSocket;
-	private static final String LOG_CLIENT = "Incoming TAK client connection.";
-	private static final String ERR_IO_PROCESS = "I/O error while processing TAK client connection.";
-	private static final String ERR_IO_CLOSE = "ERROR: Closing client connection: ";
-	private static final byte[] CONN_ACK = { 'O', 'K', '\r', '\n' };
+	
+	// Generic messages.
+	private static final String M_CLTCON = "Incoming TAK client connection.";
+	
+	// Error messages.
+	private static final String E_CLTIO = "I/O error while processing TAK client connection.";
+	private static final String E_CLOSE = "I/O error while closing TAK client connection.";
+	
+	// Network messages.
+	private static final byte[] N_CONACK = { 'O', 'K', '\r', '\n' };
 
 	public ClientHandler(Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -40,18 +47,17 @@ public class ClientHandler implements Runnable {
 		try {
 			is = clientSocket.getInputStream();
 			InputStreamReader isReader = new InputStreamReader(is);
-			Launcher.getLogger().info(LOG_CLIENT);
-			clientSocket.getOutputStream().write(CONN_ACK);
+			Launcher.getLogger().info(M_CLTCON);
+			clientSocket.getOutputStream().write(N_CONACK);
 
 			new WindClockProtocol(isReader).run();
 		} catch (IOException e) {
-			Launcher.getLogger().log(Level.SEVERE, ERR_IO_PROCESS, e);
-			e.printStackTrace();
+			Launcher.getLogger().log(Level.SEVERE, E_CLTIO, e);
 		} finally {
 			try {
 				clientSocket.close();
 			} catch (IOException e) {
-				Launcher.getLogger().log(Level.SEVERE, ERR_IO_CLOSE, e);
+				Launcher.getLogger().log(Level.SEVERE, E_CLOSE, e);
 			}
 		}
 	}
