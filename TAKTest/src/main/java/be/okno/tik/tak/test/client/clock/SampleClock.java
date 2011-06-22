@@ -17,15 +17,15 @@ import java.util.Random;
 
 import be.okno.tik.tak.commons.model.Clock;
 import be.okno.tik.tak.commons.model.MetaDataDefinition;
-import be.okno.tik.tak.dao.DaoSession;
 
 public class SampleClock {
 
 	public void duplicateClocksLauncher() {
 
+		Clock clock = ClockExample.Esplanade.clock;
+		
 		int minSleepMillis = 200;
 		int maxSleepMillis = 3000;
-		Clock clock = DaoSession.getInstance().getClockById(1);
 		List<MetaDataDefinition> mdDefs = new ArrayList<MetaDataDefinition>();
 		MetaDataDefinition mdDef = new MetaDataDefinition();
 

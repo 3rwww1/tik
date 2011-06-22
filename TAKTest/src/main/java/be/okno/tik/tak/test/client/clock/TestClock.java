@@ -16,9 +16,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.HashSet;
 import java.util.Random;
 
 import be.okno.tik.tak.commons.model.Clock;
+import be.okno.tik.tak.commons.model.MetaDataDefinition;
+import be.okno.tik.tak.commons.model.MetaDataValue;
 import be.okno.tik.tak.commons.model.Tik;
 
 import com.google.gson.Gson;
@@ -60,7 +63,17 @@ public class TestClock implements Runnable {
 			osWriter.flush();
 
 			Tik tik = new Tik();
-			tik.setIdClock(clock.getIdClock());
+			if (clock.getMetaDataDefinitions() != null) {
+
+				tik.setMetaDataValues(new HashSet<MetaDataValue>());
+				for (MetaDataDefinition mdDef : clock.getMetaDataDefinitions()) {
+					MetaDataValue mdVal = new MetaDataValue();
+					mdVal.setName(mdDef.getName());
+					mdVal.setType(mdDef.getType());
+					mdVal.setValue(Long.toString(rng.nextLong()));
+					tik.getMetaDataValues().add(mdVal);
+				}
+			}
 
 			int diffRate = maxSleepMillis - minSleepMillis;
 

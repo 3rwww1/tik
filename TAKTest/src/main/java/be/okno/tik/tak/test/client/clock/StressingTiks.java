@@ -20,17 +20,20 @@ import java.util.concurrent.Executors;
 
 import be.okno.tik.tak.commons.model.Clock;
 import be.okno.tik.tak.commons.model.MetaDataDefinition;
-import be.okno.tik.tak.dao.DaoSession;
 
 public class StressingTiks {
 
+	
 	public void stressingTiksLauncher() {
 
 		ExecutorService executor = Executors.newCachedThreadPool();
-		List<Clock> clocks;
-
+		List<Clock> clocks = new ArrayList<Clock>(ClockExample.values().length);
+		
+		for (ClockExample ex : ClockExample.values()) {
+			clocks.add(ex.clock);
+		}
+		
 		Random rng = new Random(System.currentTimeMillis());
-		clocks = DaoSession.getInstance().getAllClocks();
 		for (Clock clock : clocks) {
 			List<MetaDataDefinition> mdDefs = new ArrayList<MetaDataDefinition>();
 			
@@ -41,7 +44,6 @@ public class StressingTiks {
 			mdDef.setType("float");
 
 			mdDefs.add(mdDef);
-
 			mdDef = new MetaDataDefinition();
 
 			mdDef.setIdMddef(2);
@@ -56,7 +58,7 @@ public class StressingTiks {
 
 			clock.setMetaDataDefinitions(mdDefs);
 			executor.execute(new TestClock(clock, maxRateMillis, minRateMillis,
-					false, rng));
+					true, rng));
 		}
 	}
 
