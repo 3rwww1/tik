@@ -7,14 +7,14 @@
 		<commentGenerator>
 			<property name="suppressDate" value="true" />
 		</commentGenerator>
-		<jdbcConnection userId="root" password="toor"
+		<jdbcConnection userId="root" password="green"
 			driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://localhost/tak"></jdbcConnection>
 		<javaModelGenerator targetPackage="be.okno.tik.tak.commons.model"
-			targetProject="TAKCommons"></javaModelGenerator>
+			targetProject="TAKCommons/src/main/java"></javaModelGenerator>
 		<sqlMapGenerator targetPackage="be.okno.tik.tak.dao.mapper"
-			targetProject="TAKDao"></sqlMapGenerator>
+			targetProject="TAKDao/src/main/resources"></sqlMapGenerator>
 		<javaClientGenerator targetPackage="be.okno.tik.tak.dao.mapper"
-			targetProject="TAKDao" type="XMLMAPPER" />
+			targetProject="TAKDao/src/main/java" type="XMLMAPPER" />
 		<table schema="tak" tableName="clock" domainObjectName="Clock"
 			enableSelectByExample="false" enableUpdateByExample="false"
 			enableDeleteByExample="false" enableCountByExample="false"/>

@@ -51,4 +51,8 @@ public interface MetaDataDefinitionMapper {
 	 * @mbggenerated
 	 */
 	int updateByPrimaryKey(MetaDataDefinition record);
+
+	MetaDataDefinition selectByNameAndType(MetaDataDefinition record);
+	
+	int insertNewMetaDataDefinition(MetaDataDefinition record);
 }

@@ -8,7 +8,7 @@
     -->
     <id column="id_mddef" jdbcType="INTEGER" property="idMddef" />
     <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="type" jdbcType="CHAR" property="type" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--
@@ -42,7 +42,7 @@
     -->
     insert into mddef (id_mddef, name, type
       )
-    values (#{idMddef,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}
+    values (#{idMddef,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{type,jdbcType=CHAR}
       )
   </insert>
   <insert id="insertSelective" parameterType="be.okno.tik.tak.commons.model.MetaDataDefinition">
@@ -70,7 +70,7 @@
         #{name,jdbcType=VARCHAR},
       </if>
       <if test="type != null">
-        #{type,jdbcType=VARCHAR},
+        #{type,jdbcType=CHAR},
       </if>
     </trim>
   </insert>
@@ -85,7 +85,7 @@
         name = #{name,jdbcType=VARCHAR},
       </if>
       <if test="type != null">
-        type = #{type,jdbcType=VARCHAR},
+        type = #{type,jdbcType=CHAR},
       </if>
     </set>
     where id_mddef = #{idMddef,jdbcType=INTEGER}
@@ -97,7 +97,30 @@
     -->
     update mddef
     set name = #{name,jdbcType=VARCHAR},
-      type = #{type,jdbcType=VARCHAR}
+      type = #{type,jdbcType=CHAR}
     where id_mddef = #{idMddef,jdbcType=INTEGER}
   </update>
+  
+  <select id="selectByNameAndType" parameterType="be.okno.tik.tak.commons.model.MetaDataDefinition" resultMap="BaseResultMap">
+  	SELECT 
+  	<include refid="Base_Column_List" />
+  	FROM mddef
+  	WHERE
+  		name = #{name,jdbcType=VARCHAR}
+  	AND
+  		type = #{type,jdbcType=VARCHAR}
+  </select>
+  
+  <insert id="insertNewMetaDataDefinition" keyProperty="idMddef" parameterType="be.okno.tik.tak.commons.model.MetaDataDefinition" useGeneratedKeys="true">
+  	INSERT INTO mddef
+  	(
+  		name,
+  		type	
+  	)
+  	VALUES
+  	(
+  		#{name,jdbcType=VARCHAR},
+  		#{type,jdbcType=VARCHAR}
+  	)
+  </insert>
 </mapper>

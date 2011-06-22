@@ -54,4 +54,8 @@ public interface ClockMapper {
 	int updateByPrimaryKey(Clock record);
 
 	List<Clock> selectAllClocks();
+	
+	Clock selectClockByName(String name);
+	
+	int insertNewClock(Clock clock);
 }
