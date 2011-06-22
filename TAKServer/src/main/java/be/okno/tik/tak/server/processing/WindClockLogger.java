@@ -15,7 +15,7 @@ package be.okno.tik.tak.server.processing;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import be.okno.tik.tak.commons.model.Clock;
 import be.okno.tik.tak.commons.model.MetaDataDefinition;
@@ -25,47 +25,42 @@ import be.okno.tik.tak.commons.util.LocaleManager;
 import be.okno.tik.tak.server.Launcher;
 
 public class WindClockLogger {
-	
+
 	private StringBuilder sb;
 	private SimpleDateFormat fmt;
-	private Map<Integer, MetaDataDefinition> mdDefsMap;
-	
+
 	protected enum ClockRequestStatus {
 		/** Log on request */
 		LOGON_REQUEST,
 		/** Log on persistence */
-		LOGON_PERSIST, 
+		LOGON_PERSIST,
 		/** Log on XMMP connection */
-		LOGON_XMPPCON, 
+		LOGON_XMPPCON,
 		/** Log on success */
-		LOGON_SUCCESS, 
+		LOGON_SUCCESS,
 		/** Log on failure */
-		LOGON_FAILURE, 
-		/** TIK request */ 
-		TIK_REQUEST, 
-		/** TIK success */ 
-		TIK_SUCCESS, 
+		LOGON_FAILURE,
+		/** TIK request */
+		TIK_REQUEST,
+		/** TIK success */
+		TIK_SUCCESS,
 		/** TIK persistence */
 		TIK_PERSIST,
 		/** TIK XMPP send */
-		TIK_XMPPSEND, 
+		TIK_XMPPSEND,
 		/** TIK failure */
 		TIK_FAILURE;
 	}
-	
+
 	protected WindClockLogger() {
 		fmt = LocaleManager.getDateFormatter();
 		sb = new StringBuilder();
 	}
 
-	protected void setMetaDataDefintionsMap(Map<Integer, MetaDataDefinition> mdDefsMap) {
-		this.mdDefsMap = mdDefsMap;
-	}
-	
 	private void logMetaDataDefinitions(List<MetaDataDefinition> mdDefs) {
-		
-		int nbMdDefs = mdDefs == null ? 0 : mdDefs.size(); 
-		
+
+		int nbMdDefs = mdDefs == null ? 0 : mdDefs.size();
+
 		if (nbMdDefs != 0) {
 			sb.append(" WITH ");
 			sb.append(nbMdDefs);
@@ -82,8 +77,8 @@ public class WindClockLogger {
 		} else
 			sb.append(" WITH NO METADATAS");
 	}
-	
-	private void logMetaDataValues(List<MetaDataValue> mdVals) {
+
+	private void logMetaDataValues(Set<MetaDataValue> mdVals) {
 
 		int nbMdVals;
 
@@ -93,12 +88,12 @@ public class WindClockLogger {
 			sb.append(" METADATA VALUES:");
 			for (MetaDataValue mdVal : mdVals) {
 
-				MetaDataDefinition mdDef = mdDefsMap.get(mdVal.getIdMddef());
+				// MetaDataDefinition mdDef = mdDefsMap.get(mdVal.getIdMddef());
 				sb.append("\n\t");
 				sb.append("META name=[");
-				sb.append(mdDef.getName());
+				sb.append(mdVal.getName());
 				sb.append("],type=[");
-				sb.append(mdDef.getType());
+				sb.append(mdVal.getType());
 				sb.append("],value=[");
 				sb.append(mdVal.getValue());
 				sb.append("]");
@@ -107,8 +102,9 @@ public class WindClockLogger {
 			sb.append(" WITH NO METADATA VALUES");
 		}
 	}
-	
-	public void logClock(Clock clock, ClockRequestStatus status, boolean logMdDefs) {
+
+	public void logClock(Clock clock, ClockRequestStatus status,
+			boolean logMdDefs) {
 		sb.append(status);
 		sb.append(" clock name=[");
 		sb.append(clock.getName());

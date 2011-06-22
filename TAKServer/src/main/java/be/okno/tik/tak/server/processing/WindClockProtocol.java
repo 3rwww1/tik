@@ -14,15 +14,11 @@ package be.okno.tik.tak.server.processing;
 
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.logging.Level;
 
 import be.okno.tik.tak.commons.model.Clock;
 import be.okno.tik.tak.commons.model.MetaDataDefinition;
-import be.okno.tik.tak.commons.model.MetaDataValue;
 import be.okno.tik.tak.commons.model.Tik;
-import be.okno.tik.tak.dao.DaoSession;
 import be.okno.tik.tak.server.Launcher;
 import be.okno.tik.tak.server.processing.WindClockLogger.ClockRequestStatus;
 
@@ -39,101 +35,49 @@ public class WindClockProtocol {
 	private static final String E_REGISTER = "An error occured registering the current TAK client.";
 	private static final String E_TIK = "An error occured receiving a tik from the current TAK client.";
 
-	private Map<Integer, MetaDataDefinition> mdDefsMap;
-	private int nbMdDefs;
 	private Clock clock;
 	private JsonStreamParser parser;
 	private WindTimeProtocol wtp;
-
 	private WindClockLogger wcLogger;
+	private List<MetaDataDefinition> mdDefs;
+	private int nbMdDefs;
 
 	public WindClockProtocol(InputStreamReader isReader) {
 		parser = new JsonStreamParser(isReader);
-		mdDefsMap = new TreeMap<Integer, MetaDataDefinition>();
 		wcLogger = new WindClockLogger();
 		wtp = new WindTimeProtocol();
 	}
 
 	private boolean onClock() {
 		boolean result;
-		List<MetaDataDefinition> mdDefs = clock.getMetaDataDefinitions();
-
-		if (mdDefs != null) {
-			for (MetaDataDefinition mdDef : mdDefs) {
-				mdDefsMap.put(mdDef.getIdMddef(), mdDef);
-			}
-		}
-		wcLogger.setMetaDataDefintionsMap(mdDefsMap);
 
 		wcLogger.logClock(clock, ClockRequestStatus.LOGON_REQUEST, true);
 
-		// invoke blocking DAO call to retrieve clock data
-		Clock dbClock = DaoSession.getInstance().getClockById(
-				clock.getIdClock());
+		mdDefs = clock.getMetaDataDefinitions();
+		nbMdDefs = mdDefs == null ? 0 : mdDefs.size();
 
-		if (dbClock != null && dbClock.getIdClock().equals(clock.getIdClock())) {
-			// the clock was found by the DAO, and are consistent.
-			if (!(dbClock.equals(clock))) {
-				// the connected clock data is different from DAO clock data
-				// invoke blocking DAO call to update clock data
-				DaoSession.getInstance().updateClock(dbClock);
-			}
-			wcLogger.logClock(clock, ClockRequestStatus.LOGON_PERSIST, false);
-			// login agent on XMPP server
-			wcLogger.logClock(clock, ClockRequestStatus.LOGON_XMPPCON, false);
-			result = wtp.onClock(clock);
-		} else {
-			// clock was not found by the DAO or the IDs were inconsistent
-			result = false;
-		}
-
+		wcLogger.logClock(clock, ClockRequestStatus.LOGON_XMPPCON, false);
+		result = wtp.onClock(clock);
 		// log & return
 		wcLogger.logClock(clock, !result ? ClockRequestStatus.LOGON_FAILURE
 				: ClockRequestStatus.LOGON_SUCCESS, true);
 		return result;
 	}
 
-	private boolean checkTikMetaDataValues(List<MetaDataValue> mdVals) {
-
-		boolean result = true;
-
-		int nbMdVals = mdVals == null ? 0 : mdVals.size();
-
-		if (nbMdVals != nbMdDefs) {
-			// the number of meta data values is inconsistent
-			result = false;
-		} else if (mdVals != null) {
-			// the number of meta data values is consistent
-
-			for (MetaDataValue mdVal : mdVals) {
-
-				if (mdVal.getIdMddef() == null
-						|| mdDefsMap.get(mdVal.getIdMddef()) == null) {
-					// a meta data id is not correct
-
-					result = false;
-					break;
-				}
-			}
-		}
-		return result;
-	}
 
 	private boolean onTik(Tik tik) {
 
 		boolean result = true;
+
+		tik.setIdClock(clock.getIdClock());
 		wcLogger.logTik(ClockRequestStatus.TIK_REQUEST, tik, false);
-		List<MetaDataValue> mdVals = tik.getMetaDataValues();
 
-		if (tik.getIdClock() == clock.getIdClock()) {
-			// the clock id is consistent
-			result = checkTikMetaDataValues(mdVals);
+		//result = checkTikMetaDataValues(tik.getMetaDataValues());
 
-		} else {
-			// the clock id is not consistent
-			result = false;
+		if (result) {
+			wcLogger.logTik(ClockRequestStatus.TIK_XMPPSEND, tik, false);
+			result = wtp.onTik(tik);
 		}
-		result = wtp.onTik(tik);
 		wcLogger.logTik(result ? ClockRequestStatus.TIK_SUCCESS
 				: ClockRequestStatus.TIK_FAILURE, tik, true);
 
@@ -155,10 +99,9 @@ public class WindClockProtocol {
 					while (parser.hasNext()) {
 						element = parser.next();
 						tik = (Tik) gson.fromJson(element, Tik.class);
-						if (onTik(tik))
-							;
-						else {
+						if (!onTik(tik)) {
 							Launcher.getLogger().log(Level.SEVERE, E_TIK);
+							break;
 						}
 					}
 				} else {

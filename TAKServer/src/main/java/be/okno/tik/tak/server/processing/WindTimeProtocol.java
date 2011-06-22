@@ -12,7 +12,16 @@
 
 package be.okno.tik.tak.server.processing;
 
-import static be.okno.tik.tak.commons.util.Constants.*; 
+import static be.okno.tik.tak.commons.util.Constants.C_AT;
+import static be.okno.tik.tak.commons.util.Constants.C_CBKT;
+import static be.okno.tik.tak.commons.util.Constants.C_COL;
+import static be.okno.tik.tak.commons.util.Constants.C_COM;
+import static be.okno.tik.tak.commons.util.Constants.C_DOT;
+import static be.okno.tik.tak.commons.util.Constants.C_EQ;
+import static be.okno.tik.tak.commons.util.Constants.C_NL;
+import static be.okno.tik.tak.commons.util.Constants.C_OBKT;
+import static be.okno.tik.tak.commons.util.Constants.C_SP;
+import static be.okno.tik.tak.commons.util.Constants.C_TAB;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,8 +44,11 @@ import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 
 import be.okno.tik.tak.commons.model.Clock;
+import be.okno.tik.tak.commons.model.MetaDataValue;
 import be.okno.tik.tak.commons.model.Tik;
 import be.okno.tik.tak.server.Launcher;
+
+import com.thoughtworks.xstream.XStream;
 
 public class WindTimeProtocol {
 
@@ -45,11 +57,11 @@ public class WindTimeProtocol {
 	private String jid;
 	private PubSubManager mgr;
 	private LeafNode clockNode;
-	private int tiks;
+	private long tiks;
 	private static String host;
 	private static int port;
 	private static String pubsub;
-	
+
 	// Constant objects and values.
 	// TODO Remove default configuration values.
 	private static final int C_XMPPDEFPORT = 5222;
@@ -59,7 +71,7 @@ public class WindTimeProtocol {
 	private static final String C_XMPPPASSWD = "password";
 	private static final String C_XMPPMAIL = "email";
 	private static final String C_XMPPJID = "jid";
-	
+
 	// Properties keys.
 	private static final String K_HOST = "tik.host";
 	private static final String K_PORT = "tik.port";
@@ -67,12 +79,15 @@ public class WindTimeProtocol {
 
 	// Error messages.
 	private static final String E_FMTPORT = "Error while parsing TIK port configuration value.";
-	
+
 	// Warning messages.
-	private static final String W_DEFPORT = "TIK XMPP port is not defined in configuration file, using default port: " +  C_XMPPDEFPORT + ".";
-	private static final String W_DEFHOST = "TIK XMPP host is not defined in configuration file, connecting to default host: " + C_XMPPDEFHOST;
-	private static final String W_DEFPUBSUB = "TIK XMPP pubsub service is not defined in configuration file, using default pubsub service: " + C_XMPPDEFPUBSUB;
-	
+	private static final String W_DEFPORT = "TIK XMPP port is not defined in configuration file, using default port: "
+			+ C_XMPPDEFPORT + ".";
+	private static final String W_DEFHOST = "TIK XMPP host is not defined in configuration file, connecting to default host: "
+			+ C_XMPPDEFHOST;
+	private static final String W_DEFPUBSUB = "TIK XMPP pubsub service is not defined in configuration file, using default pubsub service: "
+			+ C_XMPPDEFPUBSUB;
+
 	// Generic messages.
 	private static final String M_STREAMERR = "stream error code";
 	private static final String M_XMPPERR = "XMPP error code";
@@ -84,7 +99,7 @@ public class WindTimeProtocol {
 	private static final String M_CREATACC = "Clock account creation";
 	private static final String M_DISCONODE = "Discovering nodes";
 	private static final String M_CREATNODE = "Creating a pubsub node for current TAK client";
-	
+
 	// Info messages.
 	private static final String I_XMPPCONN = "XMPP connection established for current TAK client";
 
@@ -95,24 +110,24 @@ public class WindTimeProtocol {
 		if (e.getStreamError() != null) {
 			Launcher.getLogger().log(
 					level,
-					type + C_SP + M_XMPPSERVER + C_COL + C_SP
-							+ M_STREAMERR + C_COL + C_SP
-							+ e.getStreamError().toString() + C_DOT, e);
+					type + C_SP + M_XMPPSERVER + C_COL + C_SP + M_STREAMERR
+							+ C_COL + C_SP + e.getStreamError().toString()
+							+ C_DOT, e);
 			knownError = true;
 		}
 		if (e.getXMPPError() != null) {
-			Launcher.getLogger().log(
-					level,
-					type + C_SP + M_XMPPSERVER + C_COL + C_SP
-							+ M_XMPPERR + C_COL + C_SP
-							+ e.getXMPPError().getCode() + C_DOT, e);
+			Launcher.getLogger()
+					.log(level,
+							type + C_SP + M_XMPPSERVER + C_COL + C_SP
+									+ M_XMPPERR + C_COL + C_SP
+									+ e.getXMPPError().getCode() + C_DOT, e);
 			knownError = true;
 		}
 		if (!knownError) {
 			Launcher.getLogger().log(
 					level,
-					type + C_SP + M_XMPPSERVER + C_COL + C_SP
-							+ M_UNKNWNERR + C_COL + C_SP + C_DOT, e);
+					type + C_SP + M_XMPPSERVER + C_COL + C_SP + M_UNKNWNERR
+							+ C_COL + C_SP + C_DOT, e);
 		}
 	}
 
@@ -132,12 +147,10 @@ public class WindTimeProtocol {
 		boolean result = true;
 
 		try {
-			connection.login(jid + C_AT + host, jid,
-					jid + clock.getIdClock());
+			connection.login(jid + C_AT + host, jid, jid + clock.getIdClock());
 		} catch (XMPPException e) {
-			logXMPPException(e, Level.WARNING, M_FAILLOGON + C_SP
-					+ C_OBKT + jid + C_CBKT + C_COM + C_SP
-					+ M_TRYCREATACC);
+			logXMPPException(e, Level.WARNING, M_FAILLOGON + C_SP + C_OBKT
+					+ jid + C_CBKT + C_COM + C_SP + M_TRYCREATACC);
 			result = false;
 		}
 		return result;
@@ -226,7 +239,8 @@ public class WindTimeProtocol {
 
 		String portString;
 
-		if ((portString = Launcher.getProperty(K_PORT)) == null || portString.isEmpty()) {
+		if ((portString = Launcher.getProperty(K_PORT)) == null
+				|| portString.isEmpty()) {
 			port = C_XMPPDEFPORT;
 			Launcher.getLogger().warning(W_DEFPORT);
 		} else {
@@ -242,7 +256,8 @@ public class WindTimeProtocol {
 			host = C_XMPPDEFHOST;
 			Launcher.getLogger().warning(W_DEFHOST);
 		}
-		if ((pubsub = Launcher.getProperty(K_PUBSUB)) == null || pubsub.isEmpty()) {
+		if ((pubsub = Launcher.getProperty(K_PUBSUB)) == null
+				|| pubsub.isEmpty()) {
 			pubsub = C_XMPPDEFPUBSUB;
 			Launcher.getLogger().warning(W_DEFPUBSUB);
 		}
@@ -254,8 +269,7 @@ public class WindTimeProtocol {
 		this.jid = clock.getName();
 
 		boolean result = false;
-		ConnectionConfiguration config = new ConnectionConfiguration(
-				host, port);
+		ConnectionConfiguration config = new ConnectionConfiguration(host, port);
 
 		config.setSelfSignedCertificateEnabled(true);
 
@@ -279,12 +293,10 @@ public class WindTimeProtocol {
 		if (result && connection != null) {
 
 			Launcher.getLogger().info(
-					I_XMPPCONN + C_NL + C_TAB + C_XMPPJID + C_EQ
-							+ C_OBKT + connection.getUser() + C_CBKT
-							+ C_DOT);
+					I_XMPPCONN + C_NL + C_TAB + C_XMPPJID + C_EQ + C_OBKT
+							+ connection.getUser() + C_CBKT + C_DOT);
 
-			mgr = new PubSubManager(connection, pubsub + C_DOT
-					+ host);
+			mgr = new PubSubManager(connection, pubsub + C_DOT + host);
 
 			result = createClockNodeIfNotExists();
 		}
@@ -292,19 +304,24 @@ public class WindTimeProtocol {
 	}
 
 	public boolean onTik(Tik tik) {
-
+		XStream xstream = new XStream();
+		xstream.alias("tik", Tik.class);
+		xstream.alias("metaDataValue", MetaDataValue.class);
 		boolean result = false;
 		if (clockNode != null) {
 
-			++tiks;
-			// TODO Major refactoring.
-			SimplePayload payload = new SimplePayload("clock", "pubsub:clock",
-					"<clock xmlns='pubsub:clock'><id>" + clockNode.getId()
-							+ tiks + "</id><tiks>" + tiks + "</tiks></clock>");
+			tik.setIdTik(++tiks);
+
+			String msg = "<clock xmlns='pubsub:clock' clockName='" + clockNode.getId() + "'>"    
+				+ xstream.toXML(tik) + "</clock>";
+			
+			SimplePayload payload = new SimplePayload("clock", "pubsub:tik",
+					msg);
 
 			PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(
-					clockNode.getId() + tiks, payload);
-
+					clockNode.getId(), payload);
+			
+			Launcher.getLogger().info(item.toXML());
 			clockNode.publish(item);
 			result = true;
 		}
